@@ -28,12 +28,18 @@ if (!fs.existsSync(path.join(__dirname, 'data'))) {
   fs.mkdirSync(path.join(__dirname, 'data'));
 }
 if (!fs.existsSync(DB_FILE)) {
-  fs.writeFileSync(DB_FILE, JSON.stringify({ confirmations: [] }, null, 2));
+  fs.writeFileSync(DB_FILE, JSON.stringify({ 
+    confirmations: [], 
+    settings: { deadline: "2026-06-01" } 
+  }, null, 2));
 }
 
 function readDB() {
   const raw = fs.readFileSync(DB_FILE, 'utf-8');
-  return JSON.parse(raw);
+  const data = JSON.parse(raw);
+  // Migration for old data files
+  if (!data.settings) data.settings = { deadline: "2026-06-01" };
+  return data;
 }
 
 function writeDB(data) {
@@ -49,6 +55,16 @@ app.post('/api/rsvp', (req, res) => {
   }
 
   const db = readDB();
+
+  // --- Date Validation ---
+  const today = new Date();
+  const deadlineDate = new Date(db.settings.deadline);
+  // We set the deadline to the END of the day (23:59:59)
+  deadlineDate.setHours(23, 59, 59, 999);
+
+  if (today > deadlineDate) {
+    return res.status(403).json({ error: 'El período de confirmación ha finalizado.' });
+  }
 
   // Prevent duplicate entries by name (case-insensitive)
   const exists = db.confirmations.find(
@@ -97,6 +113,23 @@ app.delete('/api/rsvp/:id', checkAdminAuth, (req, res) => {
   db.confirmations.splice(index, 1);
   writeDB(db);
   res.json({ success: true });
+});
+
+// GET /api/settings - get public settings
+app.get('/api/settings', (req, res) => {
+  const db = readDB();
+  res.json(db.settings);
+});
+
+// POST /api/settings - update settings
+app.post('/api/settings', checkAdminAuth, (req, res) => {
+  const { deadline } = req.body;
+  if (!deadline) return res.status(400).json({ error: 'Fecha requerida.' });
+  
+  const db = readDB();
+  db.settings.deadline = deadline;
+  writeDB(db);
+  res.json({ success: true, settings: db.settings });
 });
 
 app.listen(PORT, () => {

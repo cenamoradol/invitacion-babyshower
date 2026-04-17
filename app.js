@@ -19,6 +19,7 @@ const submitBtn    = document.getElementById('submit-btn');
 const submitLabel  = document.getElementById('submit-text');
 const familyFields = document.getElementById('family-fields');
 const soloBadge    = document.getElementById('solo-badge');
+const closedDiv    = document.getElementById('rsvp-closed');
 
 // ─── Apply mode on page load ───────────────────────────
 if (isSolo) {
@@ -179,7 +180,36 @@ function initAnimations() {
   });
 }
 
+// ─── Deadline Check ───────────────────────────────────
+async function checkDeadline() {
+  try {
+    const res = await fetch('/api/settings');
+    if (!res.ok) return;
+    const settings = await res.json();
+    
+    const today = new Date();
+    const deadlineDate = new Date(settings.deadline);
+    deadlineDate.setHours(23, 59, 59, 999);
+
+    if (today > deadlineDate) {
+      if (form) form.style.display = 'none';
+      if (soloBadge) soloBadge.style.display = 'none';
+      if (closedDiv) closedDiv.style.display = 'block';
+      
+      // Update the subtitle text to be more clear
+      const subtitle = document.querySelector('.rsvp-card__subtitle');
+      if (subtitle) subtitle.style.display = 'none';
+      
+      const title = document.querySelector('.rsvp-card__title');
+      if (title) title.textContent = 'Registro Finalizado';
+    }
+  } catch (err) {
+    console.error('Error checking deadline');
+  }
+}
+
 // Start everything
 document.addEventListener('DOMContentLoaded', () => {
   initAnimations();
+  checkDeadline();
 });

@@ -32,6 +32,8 @@ const toastEl       = document.getElementById('toast');
 const loginOverlay  = document.getElementById('login-overlay');
 const loginForm     = document.getElementById('login-form');
 const loginInput    = document.getElementById('login-password');
+const deadlineInput = document.getElementById('deadline-input');
+const saveSettingsBtn = document.getElementById('save-settings');
 
 // ── Auth Helper ────────────────────────────────────
 function getAuthToken() {
@@ -63,11 +65,59 @@ async function fetchGuests() {
     renderStats(data);
     renderTable(allGuests);
     lastUpdate.textContent = `Última actualización: ${formatTime(new Date())}`;
+    
+    // Also fetch settings when successful
+    fetchSettings();
   } catch (err) {
     showToast('Error al cargar los datos.', 'error');
   } finally {
     refreshBtn.classList.remove('spinning');
   }
+}
+
+async function fetchSettings() {
+  try {
+    const res = await fetch('/api/settings');
+    if (!res.ok) throw new Error();
+    const settings = await res.json();
+    if (deadlineInput) deadlineInput.value = settings.deadline;
+  } catch (err) {
+    console.error('Error fetching settings');
+  }
+}
+
+async function updateSettings() {
+  const token = getAuthToken();
+  const deadline = deadlineInput.value;
+  if (!deadline) return;
+
+  saveSettingsBtn.disabled = true;
+  try {
+    const res = await fetch('/api/settings', {
+      method: 'POST',
+      headers: { 
+        'Content-Type': 'application/json',
+        'x-auth-token': token
+      },
+      body: JSON.stringify({ deadline })
+    });
+
+    if (res.status === 401) {
+      showLogin();
+      return;
+    }
+
+    if (!res.ok) throw new Error();
+    showToast('Fecha límite actualizada', 'success');
+  } catch (err) {
+    showToast('Error al guardar ajustes', 'error');
+  } finally {
+    saveSettingsBtn.disabled = false;
+  }
+}
+
+if (saveSettingsBtn) {
+  saveSettingsBtn.addEventListener('click', updateSettings);
 }
 
 function showLogin() {
