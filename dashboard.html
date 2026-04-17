@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dashboard · Baby Shower Christopher 🦁</title>
+  <meta name="description" content="Dashboard privado de confirmaciones de asistencia al Baby Shower de Christopher." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Serif:wght@400;600;700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet" />
+  <link rel="stylesheet" href="dashboard.css" />
+</head>
+<body>
+
+  <!-- ── SIDEBAR ── -->
+  <aside class="sidebar">
+    <div class="sidebar__brand">
+      <div class="sidebar__lion">🦁</div>
+      <div>
+        <p class="sidebar__title">Christopher</p>
+        <p class="sidebar__sub">Baby Shower Dashboard</p>
+      </div>
+    </div>
+
+    <nav class="sidebar__nav">
+      <a href="#resumen"       class="sidebar__link sidebar__link--active">
+        <span class="material-icons-round">dashboard</span> Resumen
+      </a>
+      <a href="#invitados"     class="sidebar__link">
+        <span class="material-icons-round">people</span> Invitados
+      </a>
+      <a href="index.html"     class="sidebar__link sidebar__link--external" target="_blank">
+        <span class="material-icons-round">open_in_new</span> Ver Invitación
+      </a>
+    </nav>
+
+    <div class="sidebar__event">
+      <span class="material-icons-round">event</span>
+      <div>
+        <p class="sidebar__event-date">06 Jun · 2025</p>
+        <p class="sidebar__event-time">2:00 PM · Safari</p>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ── MAIN ── -->
+  <main class="main">
+
+    <!-- Header -->
+    <header class="dash-header">
+      <div>
+        <h1 class="dash-header__title">Panel de Asistencia</h1>
+        <p class="dash-header__sub" id="last-update">Cargando datos...</p>
+      </div>
+      <button class="btn-refresh" id="refresh-btn" title="Actualizar">
+        <span class="material-icons-round">refresh</span>
+      </button>
+    </header>
+
+    <!-- ── STATS CARDS ── -->
+    <section id="resumen" class="stats-grid">
+
+      <div class="stat-card stat-card--primary">
+        <div class="stat-card__icon">
+          <span class="material-icons-round">people</span>
+        </div>
+        <div class="stat-card__body">
+          <p class="stat-card__label">Total Confirmados</p>
+          <p class="stat-card__value" id="stat-familias">—</p>
+          <p class="stat-card__detail">grupos / familias</p>
+        </div>
+      </div>
+
+      <div class="stat-card stat-card--secondary">
+        <div class="stat-card__icon">
+          <span class="material-icons-round">person</span>
+        </div>
+        <div class="stat-card__body">
+          <p class="stat-card__label">Total Personas</p>
+          <p class="stat-card__value" id="stat-personas">—</p>
+          <p class="stat-card__detail">asistirán al evento</p>
+        </div>
+      </div>
+
+      <div class="stat-card stat-card--tertiary">
+        <div class="stat-card__icon">
+          <span class="material-icons-round">group_add</span>
+        </div>
+        <div class="stat-card__body">
+          <p class="stat-card__label">Promedio por Grupo</p>
+          <p class="stat-card__value" id="stat-promedio">—</p>
+          <p class="stat-card__detail">personas por confirmación</p>
+        </div>
+      </div>
+
+    </section>
+
+    <!-- ── PROGRESS BAR ── -->
+    <section class="capacity-section">
+      <div class="capacity-header">
+        <p class="capacity-label">
+          <span class="material-icons-round">groups</span>
+          Capacidad del evento
+        </p>
+        <span class="capacity-percent" id="capacity-pct">0%</span>
+      </div>
+      <div class="progress-bar">
+        <div class="progress-bar__fill" id="progress-fill" style="width: 0%"></div>
+      </div>
+      <p class="capacity-sub" id="capacity-sub">0 de 100 personas esperadas</p>
+    </section>
+
+    <!-- ── GUEST LIST ── -->
+    <section id="invitados" class="guest-section">
+      <div class="guest-section__header">
+        <h2 class="guest-section__title">
+          <span class="material-icons-round">format_list_bulleted</span>
+          Lista de Invitados
+        </h2>
+        <div class="guest-section__actions">
+          <div class="search-box">
+            <span class="material-icons-round">search</span>
+            <input type="text" id="search-input" placeholder="Buscar invitado..." />
+          </div>
+          <button class="btn-export" id="export-btn" title="Exportar CSV">
+            <span class="material-icons-round">download</span>
+            Exportar
+          </button>
+        </div>
+      </div>
+
+      <!-- Loading -->
+      <div class="loading-state" id="loading-state">
+        <div class="spinner"></div>
+        <p>Cargando invitados...</p>
+      </div>
+
+      <!-- Empty -->
+      <div class="empty-state" id="empty-state" style="display: none">
+        <span class="material-icons-round">inbox</span>
+        <p>Aún no hay confirmaciones</p>
+        <a href="index.html" target="_blank" class="btn-link">Ir a la invitación</a>
+      </div>
+
+      <!-- Table -->
+      <div class="table-wrap" id="table-wrap" style="display: none">
+        <table class="guest-table" id="guest-table">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Nombre</th>
+              <th>Pareja</th>
+              <th>Personas</th>
+              <th>Niños</th>
+              <th>Tipo</th>
+              <th>Teléfono</th>
+              <th>Mensaje</th>
+              <th>Fecha</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="guest-tbody">
+          </tbody>
+        </table>
+      </div>
+
+    </section>
+
+  </main>
+
+  <!-- ── DELETE CONFIRM MODAL ── -->
+  <div class="modal-overlay" id="modal-overlay" style="display:none">
+    <div class="modal">
+      <span class="material-icons-round modal__icon">warning_amber</span>
+      <h3 class="modal__title">Eliminar confirmación</h3>
+      <p class="modal__text">¿Seguro que deseas eliminar esta confirmación? Esta acción no se puede deshacer.</p>
+      <div class="modal__actions">
+        <button class="modal__btn modal__btn--cancel" id="modal-cancel">Cancelar</button>
+        <button class="modal__btn modal__btn--delete" id="modal-confirm">Eliminar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── TOAST ── -->
+  <div class="toast" id="toast"></div>
+
+  <!-- ── LOGIN OVERLAY ── -->
+  <div id="login-overlay" class="login-overlay" style="display: none;">
+    <div class="login-card">
+      <span class="material-icons-round login-card__icon">lock</span>
+      <h3 class="login-card__title">Panel Protegido</h3>
+      <p class="login-card__text">Ingresa la contraseña para acceder a la lista de invitados.</p>
+      
+      <form id="login-form">
+        <div class="login-card__input-wrap">
+          <input type="password" id="login-password" class="login-card__input" placeholder="Contraseña" required>
+        </div>
+        <button type="submit" class="login-card__btn">INGRESAR AL PANEL</button>
+      </form>
+    </div>
+  </div>
+
+  <script src="dashboard.js"></script>
+</body>
+</html>

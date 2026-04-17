@@ -1,0 +1,23 @@
+# Dependencias
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Base de Datos Local (Privacidad de invitados)
+data/rsvp.json
+# Si quieres ignorar toda la carpeta data pero mantener la estructura, usa:
+# data/*
+# !data/.gitkeep
+
+# Variables de Entorno (Contraseñas)
+.env
+
+# Archivos de Referencia de Diseño (Opcional)
+stitch_hq.png
+stitch_original.html
+stitch_screenshot.png
+
+# Archivos del Sistema
+.DS_Store
+Thumbs.db
