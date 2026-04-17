@@ -6,9 +6,9 @@
 const API_URL = '/api/rsvp';
 
 // ─── Detect invitation mode from URL ───────────────────
-// By default it is Individual. Only shows Family/Couple if ?soltero=false
-const params  = new URLSearchParams(window.location.search);
-const isSolo  = params.get('soltero') !== 'false';
+// Default: Individual. To show Partner/Family form: use ?partner
+const params = new URLSearchParams(window.location.search);
+const isSolo = !params.has('partner');
 
 // ─── DOM Elements ──────────────────────────────────────
 const form         = document.getElementById('rsvp-form');
