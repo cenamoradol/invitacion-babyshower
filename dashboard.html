@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -7,10 +8,13 @@
   <meta name="description" content="Dashboard privado de confirmaciones de asistencia al Baby Shower de Christopher." />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Noto+Serif:wght@400;600;700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Noto+Serif:wght@400;600;700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap"
+    rel="stylesheet" />
   <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet" />
   <link rel="stylesheet" href="dashboard.css" />
 </head>
+
 <body>
 
   <!-- ── SIDEBAR ── -->
@@ -24,13 +28,13 @@
     </div>
 
     <nav class="sidebar__nav">
-      <a href="#resumen"       class="sidebar__link sidebar__link--active">
+      <a href="#resumen" class="sidebar__link sidebar__link--active">
         <span class="material-icons-round">dashboard</span> Resumen
       </a>
-      <a href="#invitados"     class="sidebar__link">
+      <a href="#invitados" class="sidebar__link">
         <span class="material-icons-round">people</span> Invitados
       </a>
-      <a href="index.html"     class="sidebar__link sidebar__link--external" target="_blank">
+      <a href="index.html" class="sidebar__link sidebar__link--external" target="_blank">
         <span class="material-icons-round">open_in_new</span> Ver Invitación
       </a>
     </nav>
@@ -38,7 +42,7 @@
     <div class="sidebar__event">
       <span class="material-icons-round">event</span>
       <div>
-        <p class="sidebar__event-date">06 Jun · 2025</p>
+        <p class="sidebar__event-date">06 Jun · 2026</p>
         <p class="sidebar__event-time">2:00 PM · Safari</p>
       </div>
     </div>
@@ -191,7 +195,7 @@
       <span class="material-icons-round login-card__icon">lock</span>
       <h3 class="login-card__title">Panel Protegido</h3>
       <p class="login-card__text">Ingresa la contraseña para acceder a la lista de invitados.</p>
-      
+
       <form id="login-form">
         <div class="login-card__input-wrap">
           <input type="password" id="login-password" class="login-card__input" placeholder="Contraseña" required>
@@ -203,4 +207,5 @@
 
   <script src="dashboard.js"></script>
 </body>
+
 </html>
