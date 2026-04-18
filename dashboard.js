@@ -430,29 +430,94 @@ importInput.addEventListener('change', (e) => {
 });
 
 function parseCSV(text) {
-  const lines = text.split('\n').filter(l => l.trim());
-  if (lines.length < 2) return [];
-
-  const headers = lines[0].split(',').map(h => h.trim());
-  // Expected headers: #, Nombre, Pareja, Personas, Niños, Tipo, Teléfono, Mensaje, Fecha
+  const result = [];
+  let currentField = '';
+  let inQuotes = false;
+  let currentRow = [];
   
-  return lines.slice(1).map(line => {
-    // Basic CSV splitting (doesn't handle commas inside quotes perfectly but works for simple cases)
-    // For a more robust solution, use regex to split by comma outside quotes
-    const values = line.match(/(".*?"|[^",\s]+)(?=\s*,|\s*$)/g) || [];
-    const cleanValues = values.map(v => v.replace(/^"|"$/g, '').replace(/""/g, '"'));
+  // Robust CSV parsing for quoted fields and newlines
+  for (let i = 0; i < text.length; i++) {
+    const char = text[i];
+    const nextChar = text[i + 1];
 
+    if (inQuotes) {
+      if (char === '"' && nextChar === '"') {
+        currentField += '"';
+        i++; // skip next quote
+      } else if (char === '"') {
+        inQuotes = false;
+      } else {
+        currentField += char;
+      }
+    } else {
+      if (char === '"') {
+        inQuotes = true;
+      } else if (char === ',') {
+        currentRow.push(currentField.trim());
+        currentField = '';
+      } else if (char === '\n' || char === '\r') {
+        if (currentRow.length > 0 || currentField !== '') {
+          currentRow.push(currentField.trim());
+          result.push(currentRow);
+          currentRow = [];
+          currentField = '';
+        }
+        if (char === '\r' && nextChar === '\n') i++; // skip \n
+      } else {
+        currentField += char;
+      }
+    }
+  }
+  // push last field/row if exists
+  if (currentRow.length > 0 || currentField !== '') {
+    currentRow.push(currentField.trim());
+    result.push(currentRow);
+  }
+
+  if (result.length < 2) return [];
+
+  const headers = result[0];
+  
+  return result.slice(1).map(values => {
+    // Map values to object based on fixed positions (matching your image)
     return {
-      nombre: cleanValues[1],
-      pareja: cleanValues[2],
-      personas: parseInt(cleanValues[3]) || 1,
-      ninos: parseInt(cleanValues[4]) || 0,
-      tipo: cleanValues[5]?.toLowerCase() || 'individual',
-      telefono: cleanValues[6],
-      mensaje: cleanValues[7],
-      fecha: cleanValues[8] ? new Date(cleanValues[8]).toISOString() : new Date().toISOString()
+      nombre: values[1],
+      pareja: values[2],
+      personas: parseInt(values[3]) || 1,
+      ninos: parseInt(values[4]) || 0,
+      tipo: values[5]?.toLowerCase() || 'individual',
+      telefono: values[6],
+      mensaje: values[7],
+      fecha: parseSpanishDate(values[8])
     };
   }).filter(g => g.nombre);
+}
+
+// Helper to handle dates like "17 de abr de 2026"
+function parseSpanishDate(dateStr) {
+  if (!dateStr) return new Date().toISOString();
+  
+  // Common Spanish month abbreviations
+  const months = {
+    'ene': 0, 'feb': 1, 'mar': 2, 'abr': 3, 'may': 4, 'jun': 5,
+    'jul': 6, 'ago': 7, 'sep': 8, 'oct': 9, 'nov': 10, 'dic': 11
+  };
+
+  try {
+    const clean = dateStr.toLowerCase();
+    const parts = clean.split(' de ');
+    if (parts.length >= 2) {
+      const day = parseInt(parts[0]);
+      const monthStr = parts[1].substring(0, 3);
+      const month = months[monthStr] !== undefined ? months[monthStr] : new Date().getMonth();
+      const year = parts[2] ? parseInt(parts[2]) : new Date().getFullYear();
+      return new Date(year, month, day).toISOString();
+    }
+    const d = new Date(dateStr);
+    return isNaN(d.getTime()) ? new Date().toISOString() : d.toISOString();
+  } catch (e) {
+    return new Date().toISOString();
+  }
 }
 
 
