@@ -25,6 +25,8 @@ const tbody         = document.getElementById('guest-tbody');
 const searchInput   = document.getElementById('search-input');
 const refreshBtn    = document.getElementById('refresh-btn');
 const exportBtn     = document.getElementById('export-btn');
+const importBtn     = document.getElementById('import-btn');
+const importInput   = document.getElementById('import-input');
 const modalOverlay  = document.getElementById('modal-overlay');
 const modalCancel   = document.getElementById('modal-cancel');
 const modalConfirm  = document.getElementById('modal-confirm');
@@ -302,6 +304,72 @@ exportBtn.addEventListener('click', () => {
   URL.revokeObjectURL(url);
   showToast('CSV exportado correctamente ✓', 'success');
 });
+
+// ── Import CSV ────────────────────────────────────────
+importBtn.addEventListener('click', () => importInput.click());
+
+importInput.addEventListener('change', (e) => {
+  const file = e.target.files[0];
+  if (!file) return;
+
+  const reader = new FileReader();
+  reader.onload = async (event) => {
+    try {
+      const text = event.target.result;
+      const guests = parseCSV(text);
+      if (guests.length === 0) throw new Error('No se encontraron datos válidos.');
+
+      const token = getAuthToken();
+      const res = await fetch('/api/import', {
+        method: 'POST',
+        headers: { 
+          'Content-Type': 'application/json',
+          'x-auth-token': token
+        },
+        body: JSON.stringify({ guests })
+      });
+
+      if (res.status === 401) { showLogin(); return; }
+      if (!res.ok) throw new Error();
+
+      const result = await res.json();
+      showToast(`Importación exitosa: ${result.count} invitados`, 'success');
+      fetchGuests();
+    } catch (err) {
+      showToast(err.message || 'Error al importar CSV.', 'error');
+    } finally {
+      importInput.value = ''; // Reset input
+    }
+  };
+  reader.readAsText(file);
+});
+
+function parseCSV(text) {
+  const lines = text.split('\n').filter(l => l.trim());
+  if (lines.length < 2) return [];
+
+  const headers = lines[0].split(',').map(h => h.trim());
+  // Expected headers: #, Nombre, Pareja, Personas, Niños, Tipo, Teléfono, Mensaje, Fecha
+  
+  return lines.slice(1).map(line => {
+    // Basic CSV splitting (doesn't handle commas inside quotes perfectly but works for simple cases)
+    // For a more robust solution, use regex to split by comma outside quotes
+    const values = line.match(/(".*?"|[^",\s]+)(?=\s*,|\s*$)/g) || [];
+    const cleanValues = values.map(v => v.replace(/^"|"$/g, '').replace(/""/g, '"'));
+
+    return {
+      nombre: cleanValues[1],
+      pareja: cleanValues[2],
+      personas: parseInt(cleanValues[3]) || 1,
+      ninos: parseInt(cleanValues[4]) || 0,
+      tipo: cleanValues[5]?.toLowerCase() || 'individual',
+      telefono: cleanValues[6],
+      mensaje: cleanValues[7],
+      fecha: cleanValues[8] ? new Date(cleanValues[8]).toISOString() : new Date().toISOString()
+    };
+  }).filter(g => g.nombre);
+}
+
 
 // ── Toast ─────────────────────────────────────────────
 let toastTimer;
