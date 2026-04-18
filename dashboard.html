@@ -161,6 +161,10 @@
             <span class="material-icons-round">download</span>
             Exportar
           </button>
+          <button class="btn-export" id="bulk-delete-btn" title="Eliminar seleccionados" style="display: none; background: #fee2e2; color: #991b1b; border: 1px solid #fecaca;">
+            <span class="material-icons-round">delete_sweep</span>
+            Eliminar (<span id="selected-count">0</span>)
+          </button>
         </div>
       </div>
 
@@ -182,6 +186,9 @@
         <table class="guest-table" id="guest-table">
           <thead>
             <tr>
+              <th style="width: 40px;">
+                <input type="checkbox" id="select-all-guests" class="guest-checkbox" />
+              </th>
               <th>#</th>
               <th>Nombre</th>
               <th>Pareja</th>

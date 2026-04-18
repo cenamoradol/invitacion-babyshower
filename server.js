@@ -194,6 +194,22 @@ app.delete('/api/rsvp/:id', checkAdminAuth, async (req, res) => {
   }
 });
 
+// DELETE /api/rsvp - Bulk delete confirmations
+app.post('/api/rsvp/bulk-delete', checkAdminAuth, async (req, res) => {
+  const { ids } = req.body;
+  if (!Array.isArray(ids) || ids.length === 0) {
+    return res.status(400).json({ error: 'IDs requeridos.' });
+  }
+
+  try {
+    const result = await pool.query('DELETE FROM confirmations WHERE id = ANY($1)', [ids]);
+    res.json({ success: true, count: result.rowCount });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Error al eliminar múltiples registros.' });
+  }
+});
+
 // GET /api/settings - get public settings
 app.get('/api/settings', async (req, res) => {
   try {
